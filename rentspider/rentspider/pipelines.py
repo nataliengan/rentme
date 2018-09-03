@@ -64,7 +64,7 @@ class RentspiderPipeline(object):
 
         # For Room listings:
         # Parse private_bedroom, private_bathroom
-        if item['subattributes']:
+        if spider.name == "rooms" and item['subattributes']:
             for attr in item['subattributes']:
                 if "bath" in attr:
                     if "no" in attr:

@@ -90,3 +90,19 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 CLOSESPIDER_ITEMCOUNT = 5
+
+FEED_EXPORT_FIELDS = [
+        "price", 
+        "attributes", 
+        "subattributes",
+        "neighborhood",
+        "location",
+        "bedrooms",
+        "bathrooms",
+        "private_bedroom",
+        "private_bathroom",
+        "sqft",
+        "latitude",
+        "longitude",
+        "latlng"
+]
