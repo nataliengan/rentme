@@ -25,6 +25,7 @@ class ApartmentItem(scrapy.Item):
 class RoomItem(scrapy.Item):
     price = scrapy.Field()
     attributes = scrapy.Field()
+    subattributes = scrapy.Field()
     neighborhood = scrapy.Field()
     location = scrapy.Field()
 

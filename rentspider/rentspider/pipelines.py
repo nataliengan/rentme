@@ -4,11 +4,6 @@ import re
 import urllib.parse
 import geocoder
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 class RentspiderPipeline(object):
     def process_item(self, item, spider):
         # Parse rental price
@@ -18,7 +13,7 @@ class RentspiderPipeline(object):
         else:
             raise DropItem('Missing price in %s' % item)
 
-        # Parse Bedroom, Bathroom, Sqft
+        # Parse Bedrooms, Bathrooms, Sqft
         if item['attributes']:
             for attr in item['attributes']:
                 if "BR" in attr:
@@ -28,7 +23,10 @@ class RentspiderPipeline(object):
                 else:
                     item['sqft'] = int(attr)
         else:
-            raise DropItem('Missing attributes in %s' % item)
+            # Rooms listing may not have attributes data, so drop item only if the apartment
+            # listing lack attributes
+            if spider.name == "apartments":
+                raise DropItem('Missing attributes in %s' % item)
 
         # Parse neighbourhood if provided
         if item['neighborhood']:
@@ -63,5 +61,20 @@ class RentspiderPipeline(object):
                 raise DropItem('Missing location in %s' % item)
         else:
             raise DropItem('Missing location in %s' % item)
+
+        # For Room listings:
+        # Parse private_bedroom, private_bathroom
+        if item['subattributes']:
+            for attr in item['subattributes']:
+                if "bath" in attr:
+                    if "no" in attr:
+                        item["private_bathroom"] = 0
+                    else:
+                        item["private_bathroom"] = 1
+                if "room" in attr:
+                    if "no" in attr:
+                        item["private_bedroom"] = 0
+                    else:
+                        item["private_bedroom"] = 1
 
         return item
