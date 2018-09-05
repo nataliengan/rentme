@@ -97,12 +97,12 @@ FEED_EXPORT_FIELDS = [
         "subattributes",
         "neighborhood",
         "location",
+        "latitude",
+        "longitude",
+        "latlng",
+        "sqft",
         "bedrooms",
         "bathrooms",
         "private_bedroom",
-        "private_bathroom",
-        "sqft",
-        "latitude",
-        "longitude",
-        "latlng"
+        "private_bathroom"
 ]
