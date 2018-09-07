@@ -5,7 +5,8 @@ from scrapy import signals
 from scrapy.xlib.pydispatch import dispatcher
 from settings import FEED_EXPORT_FIELDS, EXPORT_DIRECTORY_NAME
 from constants import AREAS, POSTAL_MAP
-from os import mkdir, getcwd
+from os import mkdir, getcwd, path
+from shutil import rmtree
 
 import pathlib
 import re
@@ -97,7 +98,12 @@ class MultiCSVItemPipeline(object):
 
     def spider_opened(self, spider):
         export_path = getcwd() + '/' + EXPORT_DIRECTORY_NAME + '/'
+
+        # Replace existing exports
+        if path.exists(EXPORT_DIRECTORY_NAME):
+            rmtree(EXPORT_DIRECTORY_NAME)
         mkdir(EXPORT_DIRECTORY_NAME)
+        
         self.files = dict([ (name, open(export_path+name+'.csv','w+b')) for name in AREAS ])
         self.exporters = dict([ (name,CsvItemExporter(self.files[name])) for name in AREAS])
         for e in self.exporters.values():
