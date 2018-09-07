@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from scrapy.spiders import CrawlSpider, Spider, Request, Rule
+from scrapy.spiders import CrawlSpider, Request, Rule
 from scrapy.linkextractors import LinkExtractor
 from rentspider.items import RoomItem 
 
@@ -14,7 +14,7 @@ class RoomsSpider(CrawlSpider):
             callback='parse_item'
         ),
     	Rule(
-    		LinkExtractor(allow=(), restrict_xpaths=('//a[contains(@class, "button next")]')),
+    		LinkExtractor(allow=(), restrict_xpaths=('//a[@class="button next"]')),
             follow=True, 
             callback='parse'
         )
@@ -23,9 +23,11 @@ class RoomsSpider(CrawlSpider):
     def parse_item(self, response):
         item = RoomItem()
 
+        # item['url'] = response.request.url
         item['price'] = response.xpath('//span/span[@class="price"]/text()').extract_first()
         item['attributes'] = response.xpath('//p[@class="attrgroup"]/span/b/text()').extract()
         item['subattributes'] = response.xpath('//p[@class="attrgroup"]/span/text()').extract()
         item['neighborhood'] = response.xpath('//span/small/text()').extract_first()
         item['location'] = response.xpath('//a[contains(@href, "https://maps.google.com/")]/@href').extract_first()
+        
         return item

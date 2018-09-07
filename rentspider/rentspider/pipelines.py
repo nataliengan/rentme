@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 from scrapy.exceptions import DropItem
+from scrapy.exporters import CsvItemExporter
+from scrapy import signals
+from scrapy.xlib.pydispatch import dispatcher
+from settings import FEED_EXPORT_FIELDS, EXPORT_DIRECTORY_NAME
+from constants import AREAS, POSTAL_MAP
+from os import mkdir, getcwd
+
+import pathlib
 import re
 import urllib.parse
 import geocoder
@@ -30,7 +38,7 @@ class RentspiderPipeline(object):
 
         # Parse neighbourhood if provided
         if item['neighborhood']:
-                item['neighborhood'] = re.sub('[^\s\w/\.]+', '', ''.join(item['neighborhood'])).rstrip().lstrip()
+            item['neighborhood'] = re.sub('[^\s\w/\.]+', '', ''.join(item['neighborhood'])).rstrip().lstrip()
 
         # Parse Latitude and Longitude
         if item['location']:
@@ -46,7 +54,7 @@ class RentspiderPipeline(object):
                     longitude = geo_location.lng
                     item['latitude'] = latitude
                     item['longitude'] = longitude
-                    item['latlng'] = 'POINT(%s %s)' % (latitude, longitude)
+                    item['postal'] = self.get_postal_code(item['latitude'], item['longitude'])
                 else:
                     raise DropItem('Missing geolocation in %s' % item)
             elif "@" in location_query:
@@ -56,7 +64,7 @@ class RentspiderPipeline(object):
                 longitude = location_attrs[1]
                 item['latitude'] = latitude
                 item['longitude'] = longitude
-                item['latlng'] = 'POINT(%s %s)' % (latitude, longitude)
+                item['postal'] = self.get_postal_code(item['latitude'], item['longitude'])
             else:
                 raise DropItem('Missing location in %s' % item)
         else:
@@ -78,3 +86,37 @@ class RentspiderPipeline(object):
                         item["private_bedroom"] = 1
 
         return item
+
+    def get_postal_code(self, lat, lng):
+        return geocoder.google([lat,lng], method='reverse').postal
+
+class MultiCSVItemPipeline(object):
+    def __init__(self):
+        dispatcher.connect(self.spider_opened, signal=signals.spider_opened)
+        dispatcher.connect(self.spider_closed, signal=signals.spider_closed)
+
+    def spider_opened(self, spider):
+        export_path = getcwd() + '/' + EXPORT_DIRECTORY_NAME + '/'
+        mkdir(EXPORT_DIRECTORY_NAME)
+        self.files = dict([ (name, open(export_path+name+'.csv','w+b')) for name in AREAS ])
+        self.exporters = dict([ (name,CsvItemExporter(self.files[name])) for name in AREAS])
+        for e in self.exporters.values():
+            e.fields_to_export = FEED_EXPORT_FIELDS
+        [e.start_exporting() for e in self.exporters.values()]
+
+    def spider_closed(self, spider):
+        [e.finish_exporting() for e in self.exporters.values()]
+        [f.close() for f in self.files.values()]
+
+    def process_item(self, item, spider):
+        area = self.postal_to_area(item['postal'])
+
+        if area in set(AREAS):
+            # Only export item if it is located in an area
+            self.exporters[area].export_item(item)
+        return item
+
+    def postal_to_area(self, postal):
+        # Get first 3 character of postal code to identify area
+        prefix = postal.split(' ')[0]
+        return POSTAL_MAP[prefix]

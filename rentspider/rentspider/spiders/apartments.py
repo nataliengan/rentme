@@ -23,9 +23,10 @@ class ApartmentsSpider(CrawlSpider):
     def parse_item(self, response):
         item = ApartmentItem()
 
+        # item['url'] = response.request.url
         item['price'] = response.xpath('//span/span[@class="price"]/text()').extract_first()
         item['attributes'] = response.xpath('//p[@class="attrgroup"]/span/b/text()').extract()
-        # item['subattributes'] = response.xpath('//p[@class="attrgroup"]/span/text()').extract()
+        item['subattributes'] = response.xpath('//p[@class="attrgroup"]/span/text()').extract()
         item['neighborhood'] = response.xpath('//span/small/text()').extract_first()
         item['location'] = response.xpath('//a[contains(@href, "https://maps.google.com/")]/@href').extract_first()
 
