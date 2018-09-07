@@ -6,7 +6,14 @@ from rentspider.items import RoomItem
 class RoomsSpider(CrawlSpider):
     name = 'rooms'
     allowed_domains = ['vancouver.craigslist.ca']
-    start_urls = ['https://vancouver.craigslist.ca/search/roo?/']
+    start_urls = [
+        'https://vancouver.craigslist.ca/search/bnc/roo?',
+        'https://vancouver.craigslist.ca/search/rds/roo?',
+        'https://vancouver.craigslist.ca/search/nvn/roo?',
+        'https://vancouver.craigslist.ca/search/rch/roo?',
+        'https://vancouver.craigslist.ca/search/pml/roo?',
+        'https://vancouver.craigslist.ca/search/van/roo?'
+    ]
     rules = (
     	Rule(
     		LinkExtractor(allow=(), restrict_xpaths=('//a[@class="result-title hdrlnk"]')),
@@ -30,4 +37,4 @@ class RoomsSpider(CrawlSpider):
         item['neighborhood'] = response.xpath('//span/small/text()').extract_first()
         item['location'] = response.xpath('//a[contains(@href, "https://maps.google.com/")]/@href').extract_first()
         
-        return item
+        yield item

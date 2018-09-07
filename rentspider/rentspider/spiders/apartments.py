@@ -6,7 +6,14 @@ from rentspider.items import ApartmentItem
 class ApartmentsSpider(CrawlSpider):
     name = 'apartments'
     allowed_domains = ['vancouver.craigslist.ca']
-    start_urls = ['https://vancouver.craigslist.ca/d/apts-housing-for-rent/search/apa/']
+    start_urls = [
+        'https://vancouver.craigslist.ca/search/bnc/apa?',
+        'https://vancouver.craigslist.ca/search/rds/apa?',
+        'https://vancouver.craigslist.ca/search/nvn/apa?',
+        'https://vancouver.craigslist.ca/search/rch/apa?',
+        'https://vancouver.craigslist.ca/search/pml/apa?',
+        'https://vancouver.craigslist.ca/search/van/apa?'
+    ]
     rules = (
     	Rule(
     		LinkExtractor(allow=(), restrict_xpaths=('//a[@class="result-title hdrlnk"]')),
