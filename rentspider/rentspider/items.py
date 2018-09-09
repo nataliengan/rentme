@@ -22,6 +22,10 @@ class ApartmentItem(scrapy.Item):
     latitude = scrapy.Field()
     longitude = scrapy.Field()
     postal = scrapy.Field()
+
+    furnished = scrapy.Field()
+    laundry = scrapy.Field()
+
     pass
 
 class RoomItem(scrapy.Item):
@@ -38,4 +42,8 @@ class RoomItem(scrapy.Item):
     latitude = scrapy.Field()
     longitude = scrapy.Field()
     postal = scrapy.Field()
+
+    furnished = scrapy.Field()
+    laundry = scrapy.Field()
+    
     pass

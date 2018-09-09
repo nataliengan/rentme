@@ -103,6 +103,8 @@ FEED_EXPORT_FIELDS = [
     "longitude",
     "postal",
     "sqft",
+    "furnished",
+    "laundry",
     "bedrooms",
     "bathrooms",
     "private_bedroom",

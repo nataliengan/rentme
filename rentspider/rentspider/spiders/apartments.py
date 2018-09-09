@@ -37,4 +37,4 @@ class ApartmentsSpider(CrawlSpider):
         item['neighborhood'] = response.xpath('//span/small/text()').extract_first()
         item['location'] = response.xpath('//a[contains(@href, "https://maps.google.com/")]/@href').extract_first()
 
-        yield item
+        return item

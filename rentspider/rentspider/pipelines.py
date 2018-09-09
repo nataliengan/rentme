@@ -37,25 +37,63 @@ class RentspiderPipeline(object):
             if spider.name == "apartments":
                 raise DropItem('Missing attributes in %s' % item)
 
+        # For Room listings:
+        # Parse private_bedroom, private_bathroom
+        item['furnished'] = 0
+        item['laundry'] = 0
+        if item['subattributes']:
+            for attr in item['subattributes']:
+                print("SUBATTR : " + attr)
+                # get private BR/Ba info only for room listings
+                if spider.name == "rooms":
+                    if "private bath" in attr:
+                        if "no" in attr:
+                            item["private_bathroom"] = 0
+                        else:
+                            item["private_bathroom"] = 1
+                    if "private room" in attr:
+                        if "no" in attr:
+                            item["private_bedroom"] = 0
+                        else:
+                            item["private_bedroom"] = 1
+
+                # get furnished info for apartments AND rooms (default = 0)
+                if "furnished" in attr and "no" not in attr:
+                    item["furnished"] = 1
+
+                # get laundry info for apartments AND rooms (default = 0)
+                if ("w/d" in attr) or ("laundry" in attr):
+                    if "unit" in attr:
+                        item['laundry'] = 3
+                    elif "bldg" in attr:
+                        item['laundry'] = 2
+                    elif "site" in attr and "no" not in attr:
+                        item['laundry'] = 1
+
         # Parse neighbourhood if provided
         if item['neighborhood']:
             item['neighborhood'] = re.sub('[^\s\w/\.]+', '', ''.join(item['neighborhood'])).rstrip().lstrip()
 
-        # Parse Latitude and Longitude
+        # Parse Latitude, Longitude, Postal code
         if item['location']:
             location_url = urllib.parse.unquote_plus(item['location'])
             location_query = location_url.split('/')[-1]
 
-            # parse depending on query style of Google Map URL ("q=loc:" and "@lat,Lng")
+            # Parse implementation depend on query style of Google Map URL ("q=loc:" and "@lat,Lng")
             if "loc:" in location_query:
                 address = location_query.split("loc:")[1]
                 geo_location = geocoder.google(address)
+                print(address)
                 if geo_location:
                     latitude = geo_location.lat
                     longitude = geo_location.lng
                     item['latitude'] = latitude
                     item['longitude'] = longitude
-                    item['postal'] = self.get_postal_code(item['latitude'], item['longitude'])
+                    postal = self.get_postal_code(item['latitude'], item['longitude'])
+                    if postal:
+                        item['postal'] = postal
+                    else:
+                        raise DropItem('Missing postal code in %s' % item)
                 else:
                     raise DropItem('Missing geolocation in %s' % item)
             elif "@" in location_query:
@@ -65,26 +103,15 @@ class RentspiderPipeline(object):
                 longitude = location_attrs[1]
                 item['latitude'] = latitude
                 item['longitude'] = longitude
-                item['postal'] = self.get_postal_code(item['latitude'], item['longitude'])
+                postal = self.get_postal_code(item['latitude'], item['longitude'])
+                if postal:
+                        item['postal'] = postal
+                else:
+                    raise DropItem('Missing postal code in %s' % item)
             else:
                 raise DropItem('Missing location in %s' % item)
         else:
             raise DropItem('Missing location in %s' % item)
-
-        # For Room listings:
-        # Parse private_bedroom, private_bathroom
-        if spider.name == "rooms" and item['subattributes']:
-            for attr in item['subattributes']:
-                if "bath" in attr:
-                    if "no" in attr:
-                        item["private_bathroom"] = 0
-                    else:
-                        item["private_bathroom"] = 1
-                if "room" in attr:
-                    if "no" in attr:
-                        item["private_bedroom"] = 0
-                    else:
-                        item["private_bedroom"] = 1
 
         return item
 
@@ -97,13 +124,14 @@ class MultiCSVItemPipeline(object):
         dispatcher.connect(self.spider_closed, signal=signals.spider_closed)
 
     def spider_opened(self, spider):
-        export_path = getcwd() + '/' + EXPORT_DIRECTORY_NAME + '/'
+        export_dir = spider.name + '_' + EXPORT_DIRECTORY_NAME
+        export_path = getcwd() + '/' + export_dir + '/'
 
         # Replace existing exports
-        if path.exists(EXPORT_DIRECTORY_NAME):
-            rmtree(EXPORT_DIRECTORY_NAME)
-        mkdir(EXPORT_DIRECTORY_NAME)
-        
+        if path.exists(export_dir):
+            rmtree(export_dir)
+        mkdir(export_dir)
+
         self.files = dict([ (name, open(export_path+name+'.csv','w+b')) for name in AREAS ])
         self.exporters = dict([ (name,CsvItemExporter(self.files[name])) for name in AREAS])
         for e in self.exporters.values():
