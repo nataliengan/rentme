@@ -89,6 +89,7 @@ POSTAL_MAP = {
 	"V6X": "richmond",
 	"V6Y": "richmond",
 	"V7A": "richmond",
+	"V7B": "richmond",
 	"V7C": "richmond",
 	"V7E": "richmond",
 	"V7G": "northvan",
