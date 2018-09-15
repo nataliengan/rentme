@@ -31,11 +31,7 @@ class RentspiderPipeline(object):
                     item['bathrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
                 else:
                     item['sqft'] = int(attr)
-        else:
-            # Rooms listing may not have attributes data, so drop item only if the apartment
-            # listing lack attributes
-            if spider.name == "apartments":
-                raise DropItem('Missing attributes in %s' % item)
+            # if no Bedrooms or bathrooms data, then leave blank
 
         # For Room listings:
         # Parse private_bedroom, private_bathroom
@@ -43,7 +39,6 @@ class RentspiderPipeline(object):
         item['laundry'] = 0
         if item['subattributes']:
             for attr in item['subattributes']:
-                print("SUBATTR : " + attr)
                 # get private BR/Ba info only for room listings
                 if spider.name == "rooms":
                     if "private bath" in attr:
@@ -83,7 +78,6 @@ class RentspiderPipeline(object):
             if "loc:" in location_query:
                 address = location_query.split("loc:")[1]
                 geo_location = geocoder.google(address)
-                print(address)
                 if geo_location:
                     latitude = geo_location.lat
                     longitude = geo_location.lng

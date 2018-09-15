@@ -8,21 +8,21 @@ class ApartmentsSpider(CrawlSpider):
     allowed_domains = ['vancouver.craigslist.ca']
     start_urls = [
         'https://vancouver.craigslist.ca/search/bnc/apa?',
-        'https://vancouver.craigslist.ca/search/rds/apa?',
-        'https://vancouver.craigslist.ca/search/nvn/apa?',
-        'https://vancouver.craigslist.ca/search/rch/apa?',
-        'https://vancouver.craigslist.ca/search/pml/apa?',
-        'https://vancouver.craigslist.ca/search/van/apa?'
+        # 'https://vancouver.craigslist.ca/search/rds/apa?',
+        # 'https://vancouver.craigslist.ca/search/nvn/apa?',
+        # 'https://vancouver.craigslist.ca/search/rch/apa?',
+        # 'https://vancouver.craigslist.ca/search/pml/apa?',
+        # 'https://vancouver.craigslist.ca/search/van/apa?'
     ]
     rules = (
     	Rule(
     		LinkExtractor(allow=(), restrict_xpaths=('//a[@class="result-title hdrlnk"]')),
-            follow=True, 
+            follow=True,
             callback='parse_item'
         ),
     	Rule(
     		LinkExtractor(allow=(), restrict_xpaths=('//a[@class="button next"]')),
-            follow=True, 
+            follow=True,
             callback='parse'
         )
     )
