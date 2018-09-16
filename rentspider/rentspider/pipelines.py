@@ -3,8 +3,8 @@ from scrapy.exceptions import DropItem
 from scrapy.exporters import CsvItemExporter
 from scrapy import signals
 from scrapy.xlib.pydispatch import dispatcher
-from settings import FEED_EXPORT_FIELDS, EXPORT_DIRECTORY_NAME
-from constants import AREAS, POSTAL_MAP
+from .settings import FEED_EXPORT_FIELDS, EXPORT_DIRECTORY_NAME
+from .constants import AREAS, POSTAL_MAP
 from os import mkdir, getcwd, path
 from shutil import rmtree
 
@@ -142,6 +142,8 @@ class MultiCSVItemPipeline(object):
         if area in set(AREAS):
             # Only export item if it is located in an area
             self.exporters[area].export_item(item)
+        else:
+            raise DropItem('Item not in target areas %s' % item)   
         return item
 
     def postal_to_area(self, postal):
