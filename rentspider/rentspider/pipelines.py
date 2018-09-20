@@ -23,15 +23,26 @@ class RentspiderPipeline(object):
             raise DropItem('Missing price in %s' % item)
 
         # Parse Bedrooms, Bathrooms, Sqft
-        if item['attributes']:
+        if spider.name == "apartments" and item['attributes']:
             for attr in item['attributes']:
                 if "BR" in attr:
-                    item['bedrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
+                    try:
+                        item['bedrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
+                    except ValueError:
+                        raise DropItem('Invalid value for bedroom in %s' % item)
                 elif "Ba" in attr:
-                    item['bathrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
+                    try:
+                        item['bathrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
+                    except ValueError:
+                        raise DropItem('Invalid value for bedroom in %s' % item)
                 else:
                     item['sqft'] = int(attr)
             # if no Bedrooms or bathrooms data, then leave blank
+        if spider.name == "rooms" and item['attributes']:
+            for attr in item['attributes']:
+                if "BR" not in attr and "Ba" not in attr:
+                    item['sqft'] = int(attr)
+                    break
 
         # For Room listings:
         # Parse private_bedroom, private_bathroom
@@ -137,7 +148,7 @@ class MultiCSVItemPipeline(object):
         [f.close() for f in self.files.values()]
 
     def process_item(self, item, spider):
-        area = self.postal_to_area(item['postal'])
+        area = self.postal_to_area(item, item['postal'])
 
         if area in set(AREAS):
             # Only export item if it is located in an area
@@ -146,7 +157,13 @@ class MultiCSVItemPipeline(object):
             raise DropItem('Item not in target areas %s' % item)   
         return item
 
-    def postal_to_area(self, postal):
+    def postal_to_area(self, item, postal):
         # Get first 3 character of postal code to identify area
         prefix = postal.split(' ')[0]
-        return POSTAL_MAP[prefix]
+        area = ''
+
+        try: 
+            area = POSTAL_MAP[prefix]
+        except KeyError:
+            raise DropItem('Item not in target areas %s' % item)
+        return area

@@ -2,7 +2,7 @@ AREAS = [
 	"langley",
 	"langley_city",
 	"abbotsford",
-	"mision",
+	"mission",
 	"maple_ridge",
 	"pitt_meadows",
 	"port_coquitlam",
