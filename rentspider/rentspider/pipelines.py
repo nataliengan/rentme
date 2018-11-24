@@ -34,7 +34,7 @@ class RentspiderPipeline(object):
                     try:
                         item['bathrooms'] = float(''.join(re.findall('\d+\.*\d*', attr)))
                     except ValueError:
-                        raise DropItem('Invalid value for bedroom in %s' % item)
+                        raise DropItem('Invalid value for bathroom in %s' % item)
                 else:
                     item['sqft'] = int(attr)
             # if no Bedrooms or bathrooms data, then leave blank
@@ -44,10 +44,12 @@ class RentspiderPipeline(object):
                     item['sqft'] = int(attr)
                     break
 
-        # For Room listings:
-        # Parse private_bedroom, private_bathroom
+        # Set default score for furnishing and laundry
         item['furnished'] = 0
         item['laundry'] = 0
+
+        # For Room listings:
+        # Parse private_bedroom, private_bathroom
         if item['subattributes']:
             for attr in item['subattributes']:
                 # get private BR/Ba info only for room listings
@@ -63,11 +65,11 @@ class RentspiderPipeline(object):
                         else:
                             item["private_bedroom"] = 1
 
-                # get furnished info for apartments AND rooms (default = 0)
+                # get furnishing score for apartment/room (default = 0)
                 if "furnished" in attr and "no" not in attr:
                     item["furnished"] = 1
 
-                # get laundry info for apartments AND rooms (default = 0)
+                # get laundry score for apartment/room (default = 0)
                 if ("w/d" in attr) or ("laundry" in attr):
                     if "unit" in attr:
                         item['laundry'] = 3
@@ -138,7 +140,7 @@ class MultiCSVItemPipeline(object):
         mkdir(export_dir)
 
         self.files = dict([ (name, open(export_path+name+'.csv','w+b')) for name in AREAS ])
-        self.exporters = dict([ (name,CsvItemExporter(self.files[name])) for name in AREAS])
+        self.exporters = dict([ (name, CsvItemExporter(self.files[name])) for name in AREAS ])
         for e in self.exporters.values():
             e.fields_to_export = FEED_EXPORT_FIELDS
         [e.start_exporting() for e in self.exporters.values()]

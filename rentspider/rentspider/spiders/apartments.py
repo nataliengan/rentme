@@ -7,8 +7,8 @@ class ApartmentsSpider(CrawlSpider):
     name = 'apartments'
     allowed_domains = ['vancouver.craigslist.ca']
     start_urls = [
-        # 'https://vancouver.craigslist.ca/search/bnc/apa?',
-        'https://vancouver.craigslist.ca/search/rds/apa?',
+        'https://vancouver.craigslist.ca/search/bnc/apa?',
+        # 'https://vancouver.craigslist.ca/search/rds/apa?',
         # 'https://vancouver.craigslist.ca/search/nvn/apa?',
         # 'https://vancouver.craigslist.ca/search/rch/apa?',
         # 'https://vancouver.craigslist.ca/search/pml/apa?',
