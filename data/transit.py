@@ -48,7 +48,7 @@ def main():
 		filename = filepath.rsplit("/", 1)[1]
 
 		# Export processed data (with transit info) to a csv file
-		df.to_csv(EXPORT_DIR + filename)
+		df.to_csv(EXPORT_DIR + filename, index=False)
 
 if __name__ == "__main__":
     main()
