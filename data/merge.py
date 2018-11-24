@@ -1,3 +1,8 @@
+"""
+merge.py: Concats all rental csv data for each target area from different 
+apartments_exports_* directories.
+
+"""
 import glob
 import pandas as pd
 import os
