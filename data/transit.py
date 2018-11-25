@@ -21,13 +21,14 @@ def distance_to_nearest_stop(row):
 	params = {'apikey': TRANSLINK_API_KEY, 'lat': lat, 'long': lon, 'radius': 2000}
 	response = requests.get(TRANSLINK_STOPS_URL, headers=headers, params=params)
 
+	# Leave field empty if no response from API
 	if (response.status_code == 404):
 		return None
 
 	stops = response.json()
 	distances = [stop['Distance'] for stop in stops]
 
-	print(min(distances))
+	# print(min(distances))
 	return min(distances)
 
 def main():
