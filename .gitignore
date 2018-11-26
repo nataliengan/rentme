@@ -95,3 +95,6 @@ dmypy.json
 
 # Dependency directories
 node_modules/
+
+# Pickle
+*.pkl
