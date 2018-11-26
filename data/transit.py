@@ -10,15 +10,15 @@ import requests
 import json
 
 TRANSLINK_STOPS_URL = 'http://api.translink.ca/rttiapi/v1/stops'
-TRANSLINK_API_KEY = 'zcXlwHJG2oeZrP574KZK'
+TRANSLINK_API_KEY = ''
 
-def distance_to_nearest_stop(row):
+def distance_to_nearest_stop(lat, lng):
 	# TransLink API accepts only latitude/longitude with max of 6 digit after decimal
-	lat = '%.6f'%(row['latitude'])
-	lon = '%.6f'%(row['longitude'])
+	lat = '%.6f'%(lat)
+	lng = '%.6f'%(lng)
 
 	headers = {'accept': 'application/JSON'}
-	params = {'apikey': TRANSLINK_API_KEY, 'lat': lat, 'long': lon, 'radius': 2000}
+	params = {'apikey': TRANSLINK_API_KEY, 'lat': lat, 'long': lng, 'radius': 2000}
 	response = requests.get(TRANSLINK_STOPS_URL, headers=headers, params=params)
 
 	# Leave field empty if no response from API
@@ -43,7 +43,7 @@ def main():
 		df = pd.read_csv(filepath)
 
 		# Calculate nearest distance to a bus stop for each row
-		df['stop_distance'] = df.apply(lambda row: distance_to_nearest_stop(row), axis=1)
+		df['stop_distance'] = df.apply(lambda row: distance_to_nearest_stop(row['latitude'], row['longitutde']), axis=1)
 
 		# Get File name
 		filename = filepath.rsplit("/", 1)[1]

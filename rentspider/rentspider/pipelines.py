@@ -11,6 +11,8 @@ from shutil import rmtree
 import pathlib
 import re
 import urllib.parse
+
+os.environ["GOOGLE_API_KEY"] = "" 
 import geocoder
 
 class RentspiderPipeline(object):
